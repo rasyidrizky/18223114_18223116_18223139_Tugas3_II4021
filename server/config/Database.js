@@ -5,6 +5,7 @@ import path from 'path';
 class Database {
     constructor() {
         if (!Database.instance) {
+            // setup database
             this.db = new DatabaseSync('./local_DB.sqlite');
 
             const schemaPath = path.resolve('./server/schema.sql');

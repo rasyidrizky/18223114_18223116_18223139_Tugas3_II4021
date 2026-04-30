@@ -1,6 +1,8 @@
 class CryptoClient {
+    // encoder
     static enc = new TextEncoder();
 
+    // convert buffer to base64
     static arraybuffer_to_Base64(buffer) {
         const bytes = new Uint8Array(buffer);
         let binary = '';
@@ -10,16 +12,19 @@ class CryptoClient {
         return window.btoa(binary);
     }
 
+    // key_salt generator
     static generate_salt(length = 16) {
         return window.crypto.getRandomValues(new Uint8Array(length));
     }
 
+    // generate pasangan kunci ECDH
     static async generate_keypairECDH() {
         const algorithm = {name: "ECDH", namedCurve: "P-256"};
         const keyUsage = ["deriveKey", "deriveBits"];
         return await window.crypto.subtle.generateKey(algorithm, true, keyUsage);
     }
 
+    // enkripsi kunci private
     static async encrypt_pk(private_key, password) {
         const export_key = await window.crypto.subtle.exportKey("jwk", private_key);
         const string_privateKey = JSON.stringify(export_key);

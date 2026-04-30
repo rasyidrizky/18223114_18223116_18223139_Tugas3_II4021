@@ -10,6 +10,7 @@ class AuthController {
         try {
             const { email, password, public_key, encrypted_private_key, aes_iv, key_salt } = req.body;
 
+            // generate salt + hash password
             const salt = CryptoServer.generate_salt();
             const hashed_password = CryptoServer.hashing_password(password, salt);
 

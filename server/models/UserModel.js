@@ -7,6 +7,7 @@ class UserModel {
 
     createUser(userData) {
         try {
+            // create user data to DB
             const command = this.db.prepare('INSERT INTO user (email, hash_password, salt, key_salt, public_key, encrypted_private_key, aes_iv) VALUES (?, ?, ?, ?, ?, ?, ?)');
 
             const result = command.run(
