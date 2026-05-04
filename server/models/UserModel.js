@@ -23,6 +23,19 @@ class UserModel {
             return result;
         } catch (error) {
             console.log(error.toString());
+            throw error;
+        }
+    }
+
+    findByEmail(email) {
+        try {
+            const command = this.db.prepare('SELECT * FROM user WHERE email = ?');
+            const result = command.get(email);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
         }
     }
 }

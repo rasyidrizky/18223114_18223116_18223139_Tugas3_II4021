@@ -1,6 +1,7 @@
 class CryptoClient {
     // encoder
     static enc = new TextEncoder();
+    static dec = new TextDecoder();
 
     // convert buffer to base64
     static arraybuffer_to_Base64(buffer) {
@@ -10,6 +11,17 @@ class CryptoClient {
             binary += String.fromCharCode(bytes[i]);
         }
         return window.btoa(binary);
+    }
+
+    static base64_to_ArrayBuffer(base64) {
+        const binary = window.atob(base64);
+        const bytes = new Uint8Array(binary.length);
+
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+
+        return bytes.buffer;
     }
 
     // key_salt generator
@@ -70,6 +82,60 @@ class CryptoClient {
             iv: this.arraybuffer_to_Base64(iv),
             key_salt: this.arraybuffer_to_Base64(key_salt)
         };
+    }
+
+    static async decrypt_pk(encrypted_private_key, aes_iv, key_salt, password) {
+        const keyMaterial = await window.crypto.subtle.importKey(
+            "raw",
+            this.enc.encode(password),
+            { name: "PBKDF2" },
+            false,
+            ["deriveKey"]
+        );
+
+        const algorithm = {
+            name: "PBKDF2",
+            hash: "SHA-256",
+            salt: this.base64_to_ArrayBuffer(key_salt),
+            iterations: 100000
+        };
+
+        const derivedKeyType = {
+            name: "AES-GCM",
+            length: 256
+        };
+
+        const keyUsage = ["decrypt"];
+
+        const aes_key = await window.crypto.subtle.deriveKey(
+            algorithm,
+            keyMaterial,
+            derivedKeyType,
+            false,
+            keyUsage
+        );
+
+        const decrypted = await window.crypto.subtle.decrypt(
+            {
+                name: "AES-GCM",
+                iv: this.base64_to_ArrayBuffer(aes_iv)
+            },
+            aes_key,
+            this.base64_to_ArrayBuffer(encrypted_private_key)
+        );
+
+        const privateKeyJwk = JSON.parse(this.dec.decode(decrypted));
+
+        return await window.crypto.subtle.importKey(
+            "jwk",
+            privateKeyJwk,
+            {
+                name: "ECDH",
+                namedCurve: "P-256"
+            },
+            false,
+            ["deriveKey", "deriveBits"]
+        );
     }
 }
 
