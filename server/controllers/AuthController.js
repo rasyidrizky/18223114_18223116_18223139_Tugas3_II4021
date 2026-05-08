@@ -4,12 +4,19 @@ import UserModel from '../models/UserModel.js';
 import CryptoServer from '../services/CryptoServer.js';
 import JwtLibrary from '../services/JwtLibrary.js';
 
+const JWT_ALGS = new Set(['ES256', 'ES384', 'ES512']);
+
 class AuthController {
     constructor() {
         this.userModel = new UserModel();
+        this.jwtAlg = JWT_ALGS.has(process.env.JWT_ALG) ? process.env.JWT_ALG : 'ES256';
         this.keyPath = {
-            private: 'server/jwt_private.pem',
-            public: 'server/jwt_public.pem'
+            private: this.jwtAlg === 'ES256'
+                ? 'server/jwt_private.pem'
+                : `server/jwt_${this.jwtAlg.toLowerCase()}_private.pem`,
+            public: this.jwtAlg === 'ES256'
+                ? 'server/jwt_public.pem'
+                : `server/jwt_${this.jwtAlg.toLowerCase()}_public.pem`
         };
 
         if (!fs.existsSync(this.keyPath.private) || !fs.existsSync(this.keyPath.public)) {
@@ -35,7 +42,6 @@ class AuthController {
                 return res.status(409).json({ error: "[DEBUG] Email already registered" });
             }
 
-            // generate salt + hash password
             const salt = CryptoServer.generate_salt();
             const hashed_password = CryptoServer.hashing_password(password, salt);
 
@@ -85,7 +91,7 @@ class AuthController {
 
             const token = JwtLibrary.sign({
                 header: {
-                    alg: 'ES256',
+                    alg: this.jwtAlg,
                     typ: 'JWT'
                 },
                 claims: {

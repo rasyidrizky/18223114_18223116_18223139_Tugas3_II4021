@@ -10,7 +10,6 @@ export default function Login({ onGoToRegister, onLoginSuccess }) {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log("[DEBUG] Login start...");
 
         try {
             const result = await authService.login({ email, password });
@@ -24,15 +23,17 @@ export default function Login({ onGoToRegister, onLoginSuccess }) {
                 password
             );
 
+            const privateKeyJwk = await window.crypto.subtle.exportKey('jwk', decryptedPrivateKey);
+            authService.setSession({
+                user: result.user,
+                privateKey: privateKeyJwk
+            });
+
             sessionStorage.setItem('email', result.user.email);
 
-            console.log("[DEBUG] Login result:", result);
-            console.log("[DEBUG] Login finished");
-
             setStatus('success');
-            setMessage('LOGIN SUCCESS: JWT SESSION GENERATED');
+            setMessage('Login berhasil');
 
-            // kirim data user + private key ke parent untuk navigasi ke Chat
             if (onLoginSuccess) {
                 onLoginSuccess({
                     user: result.user,
@@ -40,11 +41,8 @@ export default function Login({ onGoToRegister, onLoginSuccess }) {
                 });
             }
         } catch (error) {
-            console.log("[DEBUG] Login error:", error);
-            console.log("[DEBUG] Backend response:", error.response?.data);
-
             setStatus('error');
-            setMessage(error.response?.data?.error || 'LOGIN FAILED: INVALID CREDENTIAL OR KEY DATA');
+            setMessage(error.response?.data?.error || 'Login gagal');
         }
     };
 

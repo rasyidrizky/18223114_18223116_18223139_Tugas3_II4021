@@ -3,6 +3,7 @@ import axios from 'axios';
 class AuthService {
     constructor() {
         this.baseURL = 'http://localhost:3000/api/auth';
+        this.sessionKey = 'auth_session';
     }
 
     async register(payload) {
@@ -29,6 +30,24 @@ class AuthService {
         localStorage.setItem('token', token);
     }
 
+    setSession(session) {
+        sessionStorage.setItem(this.sessionKey, JSON.stringify(session));
+    }
+
+    getSession() {
+        const rawSession = sessionStorage.getItem(this.sessionKey);
+
+        if (!rawSession) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(rawSession);
+        } catch {
+            return null;
+        }
+    }
+
     getToken() {
         return localStorage.getItem('token');
     }
@@ -43,6 +62,7 @@ class AuthService {
 
     logout() {
         localStorage.removeItem('token');
+        sessionStorage.removeItem(this.sessionKey);
         sessionStorage.removeItem('email');
     }
 }

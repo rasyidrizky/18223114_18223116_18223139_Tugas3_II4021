@@ -8,6 +8,7 @@
     "dev:backend": "nodemon server/server.js",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build": "vite build",
+    "test": "node --test",
     "lint": "eslint .",
     "preview": "vite preview"
   },

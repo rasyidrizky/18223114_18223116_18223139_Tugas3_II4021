@@ -31,23 +31,71 @@ class JwtLibrary {
         return Buffer.from(value, 'base64');
     }
 
+    static readDerLength(buffer, offset) {
+        const firstByte = buffer[offset];
+
+        if ((firstByte & 0x80) === 0) {
+            return {
+                length: firstByte,
+                bytesRead: 1
+            };
+        }
+
+        const lengthBytes = firstByte & 0x7f;
+        let length = 0;
+
+        for (let index = 1; index <= lengthBytes; index++) {
+            length = (length << 8) | buffer[offset + index];
+        }
+
+        return {
+            length,
+            bytesRead: 1 + lengthBytes
+        };
+    }
+
+    static encodeDerLength(length) {
+        if (length < 0x80) {
+            return Buffer.from([length]);
+        }
+
+        const bytes = [];
+        let remaining = length;
+
+        while (remaining > 0) {
+            bytes.unshift(remaining & 0xff);
+            remaining >>= 8;
+        }
+
+        return Buffer.from([0x80 | bytes.length, ...bytes]);
+    }
+
     static derToJose(signature, keySize) {
         const sig = Buffer.from(signature);
-        let offset = 2; // Skip 0x30 (SEQUENCE) and total length byte
+        let offset = 0;
+
+        if (sig[offset++] !== 0x30) {
+            throw new Error('Invalid DER: expected 0x30 for SEQUENCE');
+        }
+
+        const sequenceLength = this.readDerLength(sig, offset);
+        offset += sequenceLength.bytesRead;
 
         // Read R
         if (sig[offset] !== 0x02) throw new Error('Invalid DER: expected 0x02 for R');
         offset++;
-        let rLength = sig[offset];
-        offset++;
+        const rLengthInfo = this.readDerLength(sig, offset);
+        const rLength = rLengthInfo.length;
+        offset += rLengthInfo.bytesRead;
         let r = sig.slice(offset, offset + rLength);
         offset += rLength;
 
         // Read S
         if (sig[offset] !== 0x02) throw new Error('Invalid DER: expected 0x02 for S');
         offset++;
-        let sLength = sig[offset];
-        offset++;
+        const sLengthInfo = this.readDerLength(sig, offset);
+        const sLength = sLengthInfo.length;
+        offset += sLengthInfo.bytesRead;
         let s = sig.slice(offset, offset + sLength);
 
         // Strip leading zero padding
@@ -74,9 +122,13 @@ class JwtLibrary {
         const totalLength = 2 + r.length + 2 + s.length;
 
         return Buffer.concat([
-            Buffer.from([0x30, totalLength, 0x02, r.length]),
+            Buffer.from([0x30]),
+            this.encodeDerLength(totalLength),
+            Buffer.from([0x02]),
+            this.encodeDerLength(r.length),
             r,
-            Buffer.from([0x02, s.length]),
+            Buffer.from([0x02]),
+            this.encodeDerLength(s.length),
             s
         ]);
     }
@@ -132,6 +184,10 @@ class JwtLibrary {
             payload = JSON.parse(this.base64urlDecode(encodedPayload).toString('utf8'));
         } catch {
             throw new Error('Invalid JWT encoding');
+        }
+
+        if (header.typ !== 'JWT') {
+            throw new Error('Invalid JWT type');
         }
 
         if (!ALG_CONFIG[header.alg]) {

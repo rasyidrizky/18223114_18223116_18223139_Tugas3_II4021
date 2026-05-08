@@ -13,14 +13,13 @@ export default function Register({ onGoToLogin }) {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        console.log("[DEBUG] Register start...");
         setLoading(true);
         setResultDetail(null);
 
         if (password !== confirmPassword) {
             setLoading(false);
             setStatus('error');
-            setMessage('REGISTRATION FAILED');
+            setMessage('Registrasi gagal');
 
             setResultDetail({
                 error: 'Password confirmation does not match',
@@ -36,8 +35,6 @@ export default function Register({ onGoToLogin }) {
             const exportedPubKey = await window.crypto.subtle.exportKey("jwk", key_pair.publicKey);
             const { ciphertext, iv, key_salt } = await CryptoClient.encrypt_pk(key_pair.privateKey, password);
 
-            console.log("[DEBUG] Crypto generated");
-
             const result = await authService.register({
                 email: email,
                 password: password,
@@ -47,11 +44,8 @@ export default function Register({ onGoToLogin }) {
                 key_salt: key_salt
             });
 
-            console.log("[DEBUG] Register result:", result);
-            console.log("[DEBUG] Register finished");
-
             setStatus('success');
-            setMessage('REGISTRATION SUCCESS');
+            setMessage('Registrasi berhasil');
 
             setResultDetail({
                 email: email,
@@ -64,11 +58,8 @@ export default function Register({ onGoToLogin }) {
                 keySaltLength: key_salt.length
             });
         } catch (error) {
-            console.log("[DEBUG] Register error:", error);
-            console.log("[DEBUG] Backend response:", error.response?.data);
-
             setStatus('error');
-            setMessage('REGISTRATION FAILED');
+            setMessage('Registrasi gagal');
 
             setResultDetail({
                 error: error.response?.data?.error || error.message || 'Unknown error',
@@ -139,7 +130,7 @@ export default function Register({ onGoToLogin }) {
                         </div>
 
                         <button className="auth-submit" type="submit" disabled={loading}>
-                            {loading ? 'GENERATING KEY...' : 'REGISTER & SECURE'}
+                            {loading ? 'Sedang memproses...' : 'Daftar'}
                         </button>
                     </form>
 

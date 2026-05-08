@@ -1,5 +1,11 @@
 import crypto from 'node:crypto'
 
+const JWT_CURVES = {
+    ES256: 'prime256v1',
+    ES384: 'secp384r1',
+    ES512: 'secp521r1'
+};
+
 class CryptoServer {
     static generate_salt(length = 16) {
         return crypto.randomBytes(length).toString('hex');
@@ -19,8 +25,11 @@ class CryptoServer {
     }
 
     static generateJwtKeyPair() {
+        const jwtAlg = process.env.JWT_ALG || 'ES256';
+        const namedCurve = JWT_CURVES[jwtAlg] || JWT_CURVES.ES256;
+
         return crypto.generateKeyPairSync('ec', {
-            namedCurve: 'prime256v1',
+            namedCurve,
             privateKeyEncoding: {
                 type: 'pkcs8',
                 format: 'pem'

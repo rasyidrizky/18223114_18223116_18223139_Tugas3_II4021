@@ -133,8 +133,21 @@ class CryptoClient {
                 name: "ECDH",
                 namedCurve: "P-256"
             },
-            false,
+            true,
             ["deriveKey", "deriveBits"]
+        );
+    }
+
+    static async importPrivateKeyJwk(privateKeyJwk) {
+        return await window.crypto.subtle.importKey(
+            'jwk',
+            privateKeyJwk,
+            {
+                name: 'ECDH',
+                namedCurve: 'P-256'
+            },
+            true,
+            ['deriveKey', 'deriveBits']
         );
     }
 
