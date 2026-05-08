@@ -2,7 +2,7 @@ import { useState } from 'react';
 import authService from '../services/AuthService';
 import CryptoClient from '../services/CryptoClient';
 
-export default function Login({ onGoToRegister }) {
+export default function Login({ onGoToRegister, onLoginSuccess }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -17,7 +17,7 @@ export default function Login({ onGoToRegister }) {
 
             authService.setToken(result.token);
 
-            await CryptoClient.decrypt_pk(
+            const decryptedPrivateKey = await CryptoClient.decrypt_pk(
                 result.user.encrypted_private_key,
                 result.user.aes_iv,
                 result.user.key_salt,
@@ -31,6 +31,14 @@ export default function Login({ onGoToRegister }) {
 
             setStatus('success');
             setMessage('LOGIN SUCCESS: JWT SESSION GENERATED');
+
+            // kirim data user + private key ke parent untuk navigasi ke Chat
+            if (onLoginSuccess) {
+                onLoginSuccess({
+                    user: result.user,
+                    privateKey: decryptedPrivateKey
+                });
+            }
         } catch (error) {
             console.log("[DEBUG] Login error:", error);
             console.log("[DEBUG] Backend response:", error.response?.data);

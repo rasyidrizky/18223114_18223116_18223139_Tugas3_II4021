@@ -38,6 +38,30 @@ class UserModel {
             throw error;
         }
     }
+
+    findAllExcept(userId) {
+        try {
+            const command = this.db.prepare('SELECT id, email, public_key FROM user WHERE id != ?');
+            const result = command.all(userId);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    findById(userId) {
+        try {
+            const command = this.db.prepare('SELECT id, email, public_key FROM user WHERE id = ?');
+            const result = command.get(userId);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
 }
 
 export default UserModel;

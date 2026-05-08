@@ -33,18 +33,28 @@ class JwtLibrary {
 
     static derToJose(signature, keySize) {
         const sig = Buffer.from(signature);
-        let offset = 3;
+        let offset = 2; // Skip 0x30 (SEQUENCE) and total length byte
 
-        let rLength = sig[offset - 1];
+        // Read R
+        if (sig[offset] !== 0x02) throw new Error('Invalid DER: expected 0x02 for R');
+        offset++;
+        let rLength = sig[offset];
+        offset++;
         let r = sig.slice(offset, offset + rLength);
-        offset += rLength + 1;
+        offset += rLength;
 
-        let sLength = sig[offset - 1];
+        // Read S
+        if (sig[offset] !== 0x02) throw new Error('Invalid DER: expected 0x02 for S');
+        offset++;
+        let sLength = sig[offset];
+        offset++;
         let s = sig.slice(offset, offset + sLength);
 
+        // Strip leading zero padding
         if (r[0] === 0x00 && r.length > keySize) r = r.slice(1);
         if (s[0] === 0x00 && s.length > keySize) s = s.slice(1);
 
+        // Pad to keySize
         r = Buffer.concat([Buffer.alloc(Math.max(keySize - r.length, 0)), r]);
         s = Buffer.concat([Buffer.alloc(Math.max(keySize - s.length, 0)), s]);
 
