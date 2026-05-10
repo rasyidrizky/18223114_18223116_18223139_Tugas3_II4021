@@ -16,7 +16,7 @@ import avatar5 from '../assets/profile5.jpg';
 
 const AVATAR_POOL = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onLogout }) {
+export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onGoToProfile, onLogout }) {
     const [contacts, setContacts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState('');
@@ -51,7 +51,7 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onL
     }, [contacts]);
 
     const filteredContacts = contacts.filter((contact) =>
-        contact.email.toLowerCase().includes(searchTerm.toLowerCase())
+        contact.is_added && contact.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const addContactPreview = useMemo(() => {
@@ -128,6 +128,11 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onL
     const handleAddContactSubmit = async (e) => {
         e.preventDefault();
 
+        if (!newContactEmail.trim()) {
+            setModalError('Email kontak tidak boleh kosong.');
+            return;
+        }
+
         if (!addContactPreview) {
             setModalError('Profil tidak ditemukan.');
             return;
@@ -135,7 +140,6 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onL
 
         if (addContactPreview.is_added) {
             setModalError('Kontak sudah ada di daftar.');
-            setModalError('Email kontak tidak boleh kosong.');
             return;
         }
 
@@ -160,14 +164,14 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onL
         { label: 'Dashboard', icon: homeIcon, action: onGoToDashboard },
         { label: 'Daftar Kontak', icon: friendIcon, active: true },
         { label: 'Chat', icon: chatIcon, action: onGoToChat },
-        { label: 'Profile', icon: profileIcon },
+        { label: 'Profile', icon: profileIcon, action: onGoToProfile },
         { label: 'Log Out', icon: logoutIcon, iconClass: 'dashboard-icon-logout', action: onLogout }
     ];
 
     return (
         <section className="contacts-page">
             <div className="contacts-shell">
-                <DashboardSidebar items={sidebarItems} catVariant="kucing" />
+                <DashboardSidebar items={sidebarItems} catVariant="kucing" currentUser={currentUser} />
 
                 <main className="contacts-main">
                     <section className="contacts-panel">
@@ -316,22 +320,21 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onL
                             </label>
 
                             {addContactPreview && (
-                                <button
-                                    type="button"
-                                    className="contacts-modal-preview"
-                                    onClick={() => setSelectedContact(addContactPreview)}
-                                >
-                                    <div className="contacts-modal-preview-avatar">
+                                <div className="contacts-modal-header" style={{ marginTop: '20px' }}>
+                                    <div className="contacts-modal-avatar">
                                         <img src={contactAvatars[addContactPreview.id]} alt={addContactPreview.email} />
                                     </div>
 
-                                    <div className="contacts-modal-preview-copy">
-                                        <strong>{addContactPreview.email}</strong>
-                                        <span>ECDH P-256 • {addContactPreview.public_key?.x?.substring(0, 10)}...</span>
+                                    <div className="contacts-modal-copy">
+                                        <h2>{addContactPreview.email}</h2>
+                                        <p>{addContactPreview.public_key?.x?.substring(0, 12) || 'Kunci publik tidak tersedia'}...</p>
+                                        <span>
+                                            {addContactPreview.is_added
+                                                ? 'Sudah tersimpan di daftar kontak.'
+                                                : 'Kontak ini bisa langsung kamu simpan.'}
+                                        </span>
                                     </div>
-
-                                    <div className={`contacts-modal-preview-dot ${addContactPreview.is_added ? 'added' : ''}`} />
-                                </button>
+                                </div>
                             )}
 
                             {modalError && <div className="contacts-modal-error">{modalError}</div>}

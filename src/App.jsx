@@ -4,6 +4,8 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Contacts from './pages/Contacts.jsx';
 import Chat from './pages/Chat.jsx';
+import Profile from './pages/Profile.jsx';
+import Logout from './pages/Logout.jsx';
 import authService from './services/AuthService.js';
 import CryptoClient from './services/CryptoClient.js';
 import './App.css';
@@ -59,6 +61,16 @@ function App() {
         setPage('dashboard');
     };
 
+    const handleGoToProfile = () => {
+        setChatTargetId(null);
+        setPage('profile');
+    };
+
+    const handleGoToLogout = () => {
+        setChatTargetId(null);
+        setPage('logout');
+    };
+
     return (
         <div className="auth-shell">
             {page === 'login' && (
@@ -77,7 +89,8 @@ function App() {
                     currentUser={chatData.user}
                     onGoToContacts={handleGoToContacts}
                     onGoToChat={handleGoToChat}
-                    onLogout={handleLogout}
+                    onGoToProfile={handleGoToProfile}
+                    onLogout={handleGoToLogout}
                 />
             )}
 
@@ -86,7 +99,8 @@ function App() {
                     currentUser={chatData.user}
                     onGoToDashboard={handleGoToDashboard}
                     onGoToChat={handleGoToChat}
-                    onLogout={handleLogout}
+                    onGoToProfile={handleGoToProfile}
+                    onLogout={handleGoToLogout}
                 />
             )}
 
@@ -96,7 +110,27 @@ function App() {
                     privateKey={chatData.privateKey}
                     initialContactId={chatTargetId}
                     onGoToDashboard={handleGoToDashboard}
-                    onLogout={handleLogout}
+                    onGoToContacts={handleGoToContacts}
+                    onGoToProfile={handleGoToProfile}
+                    onLogout={handleGoToLogout}
+                />
+            )}
+
+            {page === 'profile' && chatData && (
+                <Profile
+                    currentUser={chatData.user}
+                    onGoToDashboard={handleGoToDashboard}
+                    onGoToContacts={handleGoToContacts}
+                    onGoToChat={handleGoToChat}
+                    onLogout={handleGoToLogout}
+                />
+            )}
+
+            {page === 'logout' && chatData && (
+                <Logout
+                    currentUser={chatData.user}
+                    onConfirmLogout={handleLogout}
+                    onCancel={handleGoToDashboard}
                 />
             )}
         </div>

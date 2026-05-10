@@ -18,7 +18,7 @@ import DashboardSidebar from '../components/DashboardSidebar.jsx';
 
 const AVATAR_POOL = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-export default function Dashboard({ currentUser, onGoToContacts, onGoToChat, onLogout }) {
+export default function Dashboard({ currentUser, onGoToContacts, onGoToChat, onGoToProfile, onLogout }) {
     const [contacts, setContacts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState('');
@@ -55,7 +55,7 @@ export default function Dashboard({ currentUser, onGoToContacts, onGoToChat, onL
         { label: 'Dashboard', icon: homeIcon, active: true },
         { label: 'Daftar Kontak', icon: friendIcon, action: onGoToContacts },
         { label: 'Chat', icon: chatIcon, action: onGoToChat },
-        { label: 'Profile', icon: profileIcon },
+        { label: 'Profile', icon: profileIcon, action: onGoToProfile },
         { label: 'Log Out', icon: logoutIcon, iconClass: 'dashboard-icon-logout', action: onLogout }
     ];
 
@@ -100,7 +100,7 @@ export default function Dashboard({ currentUser, onGoToContacts, onGoToChat, onL
     return (
         <section className="dashboard-page">
             <div className="dashboard-shell">
-                <DashboardSidebar items={sidebarItems} catVariant="blackcat" />
+                <DashboardSidebar items={sidebarItems} catVariant="blackcat" currentUser={currentUser} />
 
                 <main className="dashboard-main">
                     <section className="dashboard-hero">

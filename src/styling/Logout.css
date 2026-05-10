@@ -1,0 +1,162 @@
+.logout-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    background:
+        radial-gradient(circle at top, rgba(255, 251, 244, 0.94), rgba(248, 239, 229, 0.7) 36%, rgba(241, 226, 210, 0.92) 100%),
+        linear-gradient(180deg, #fff8f0 0%, #f2e2d0 100%);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.logout-page::before {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border: 1px solid rgba(198, 177, 158, 0.42);
+    border-radius: 28px;
+    pointer-events: none;
+}
+
+.logout-shell {
+    position: relative;
+    z-index: 1;
+    width: min(1280px, 100%);
+    margin: 0 auto;
+    min-height: calc(100vh - 44px);
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 22px;
+}
+
+.logout-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.logout-panel {
+    background: #fffcf9;
+    border: 1px solid rgba(225, 205, 185, 0.6);
+    border-radius: 20px;
+    padding: 48px 40px;
+    box-shadow: 0 12px 24px rgba(111, 82, 58, 0.04);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+}
+
+.logout-icon-wrapper {
+    width: 130px;
+    height: 130px;
+    background: #fdf0e6;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 28px;
+    position: relative;
+}
+
+.logout-icon-wrapper::after {
+    content: '✦';
+    position: absolute;
+    right: -10px;
+    top: 20px;
+    color: #e59368;
+    font-size: 20px;
+}
+
+.logout-icon-wrapper::before {
+    content: '✦';
+    position: absolute;
+    right: -20px;
+    bottom: 30px;
+    color: #f1b392;
+    font-size: 14px;
+}
+
+.logout-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.5);
+}
+
+.logout-title {
+    margin: 0 0 8px 0;
+    color: #3b2a20;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.logout-subtitle {
+    margin: 0 0 32px 0;
+    color: #8c7a6e;
+    font-size: 14px;
+}
+
+.logout-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.logout-confirm-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ed9f75 0%, #db8455 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+.logout-confirm-btn:hover {
+    filter: brightness(1.05);
+}
+
+.logout-confirm-btn:active {
+    transform: translateY(1px);
+}
+
+.logout-paw-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.logout-cancel-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #dfd1c5;
+    color: #4b3b31;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.logout-cancel-btn:hover {
+    background: #fcf9f5;
+}
+
+@media (max-width: 920px) {
+    .logout-shell {
+        grid-template-columns: 1fr;
+    }
+}

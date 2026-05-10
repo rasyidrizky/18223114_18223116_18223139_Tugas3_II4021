@@ -15,7 +15,7 @@ import avatar5 from '../assets/profile5.jpg';
 
 const AVATAR_POOL = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
-export default function Chat({ currentUser, privateKey, initialContactId, onGoToDashboard, onLogout }) {
+export default function Chat({ currentUser, privateKey, initialContactId, onGoToDashboard, onGoToContacts, onGoToProfile, onLogout }) {
     const [contacts, setContacts] = useState([]);
     const [contactAvatars, setContactAvatars] = useState({});
     const [selectedContact, setSelectedContact] = useState(null);
@@ -25,6 +25,7 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
     const [sending, setSending] = useState(false);
     const [error, setError] = useState('');
     const [cryptoStatus, setCryptoStatus] = useState('');
+    const [showMenu, setShowMenu] = useState(false);
     const messagesEndRef = useRef(null);
     const pollIntervalRef = useRef(null);
     const filteredContacts = contacts.filter((contact) =>
@@ -227,164 +228,174 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
 
     return (
         <section className="chat-page">
-            <div className="chat-shell">
-                <header className="chat-topbar">
-                    <div className="chat-brand">
-                        <img src={profileIcon} alt="meowchat" />
-                        <div className="chat-brand-copy">
-                            <span>meowchat</span>
-                            <strong>Encrypted Chat Room</strong>
-                        </div>
-                    </div>
-
-                    <div className="chat-topbar-copy">
-                        <span>{currentUser?.email}</span>
-                        <strong>Pilih kontak lalu mulai percakapan terenkripsi.</strong>
-                    </div>
-
-                    <div className="chat-topbar-actions">
-                        {onGoToDashboard && (
-                            <button className="chat-topbar-button secondary" type="button" onClick={onGoToDashboard}>
-                                Dashboard
-                            </button>
-                        )}
-
-                        <button className="chat-topbar-button" type="button" onClick={handleLogout}>
-                            Log Out
-                        </button>
-                    </div>
-                </header>
-
-                <div className="chat-workspace">
-                    <section className="chat-panel">
-                        <div className="panel-header">
-                            <div className="panel-title">
-                                <h2>Daftar Kontak</h2>
-                                <p>{filteredContacts.length} kontak ditemukan</p>
-                            </div>
-
+            <div className="chat-app-window">
+                <aside className="chat-sidebar">
+                    <div className="chat-sidebar-top" style={{ borderBottom: 'none', paddingBottom: '0' }}>
+                        <div className="chat-sidebar-search-row">
                             <div className="chat-search">
                                 <img src={searchIcon} alt="" />
                                 <input
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Cari kontak..."
+                                    placeholder="Cari chat..."
                                 />
                             </div>
+                            <button className="chat-add-btn" type="button" onClick={onGoToDashboard} title="Kembali ke Dashboard">
+                                +
+                            </button>
                         </div>
+                    </div>
 
-                        <div className="contact-list">
-                            {filteredContacts.length === 0 && (
-                                <div className="chat-empty-state">
-                                    <img src={friendIcon} alt="" />
-                                    <div className="chat-empty-note">
-                                        <strong>Tidak ada kontak</strong>
-                                        <span>Coba kata kunci lain.</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {filteredContacts.map((contact) => (
-                                <button
-                                    key={contact.id}
-                                    type="button"
-                                    className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
-                                    onClick={() => handleSelectContact(contact)}
-                                >
-                                    <div className="contact-avatar">
-                                        <img src={avatarForContact(contact.id)} alt={contact.email} />
-                                    </div>
-                                    <div className="contact-meta">
-                                        <div className="contact-name">{contact.email}</div>
-                                        <div className="contact-status">
-                                            ECDH P-256 • {contact.public_key?.x?.substring(0, 8)}...
-                                        </div>
-                                    </div>
-                                    <div className={`contact-dot ${contact.id % 2 === 0 ? 'online' : ''}`}></div>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="chat-panel chat-window">
-                        {selectedContact ? (
-                            <>
-                                <div className="chat-header">
-                                    <div className="chat-header-info">
-                                        <h2>{selectedContact.email}</h2>
-                                        <p>E2E ENCRYPTED • AES-256-GCM • HMAC-SHA256</p>
-                                    </div>
-                                    <div className="chat-header-lock">🔒</div>
-                                </div>
-
-                                <div className="chat-messages" id="chat-messages-area">
-                                    {messages.length === 0 && (
-                                        <div className="chat-empty-chat">
-                                            <div className="chat-empty-note">
-                                                <img src={chatIcon} alt="" />
-                                                <strong>— ENCRYPTED CHANNEL ESTABLISHED —</strong>
-                                                <span>Messages are end-to-end encrypted.</span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {messages.map((msg) => (
-                                        <div
-                                            key={msg.id}
-                                            className={`chat-message-row ${msg.sender_id === currentUser.id ? 'sent' : 'received'}`}
-                                        >
-                                            <div className={`chat-bubble ${msg.decryptError ? 'error' : ''}`}>
-                                                <div className="chat-message-text">{msg.plaintext}</div>
-                                                <div className="chat-message-meta">
-                                                    <span>{formatTime(msg.timestamp)}</span>
-                                                    {!msg.decryptError && <span>🔒</span>}
-                                                    {msg.decryptError && <span className="warn">⚠</span>}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <div ref={messagesEndRef} />
-                                </div>
-
-                                {cryptoStatus && <div className="crypto-status">{cryptoStatus}</div>}
-
-                                {error && <div className="chat-error">{error}</div>}
-
-                                <form className="chat-input" onSubmit={handleSendMessage}>
-                                    <label className="chat-compose">
-                                        <img src={chatIcon} alt="" />
-                                        <input
-                                            type="text"
-                                            value={messageInput}
-                                            onChange={(e) => setMessageInput(e.target.value)}
-                                            placeholder="Ketik pesan..."
-                                            disabled={sending}
-                                            id="chat-message-input"
-                                        />
-                                    </label>
-
-                                    <button
-                                        className="chat-send"
-                                        type="submit"
-                                        disabled={sending || !messageInput.trim()}
-                                        id="chat-send-button"
-                                    >
-                                        {sending ? 'ENCRYPTING...' : 'Kirim'}
-                                    </button>
-                                </form>
-                            </>
-                        ) : (
-                            <div className="chat-empty-chat">
+                    <div className="contact-list">
+                        {filteredContacts.length === 0 && (
+                            <div className="chat-empty-state">
                                 <div className="chat-empty-note">
-                                    <img src={friendIcon} alt="" />
-                                    <strong>Pilih kontak untuk mulai chat</strong>
-                                    <span>Semua pesan akan dienkripsi otomatis.</span>
+                                    <strong>Tidak ada kontak</strong>
+                                    <span>Coba kata kunci lain.</span>
                                 </div>
                             </div>
                         )}
-                    </section>
-                </div>
+
+                        {filteredContacts.map((contact) => (
+                            <button
+                                key={contact.id}
+                                type="button"
+                                className={`contact-item ${selectedContact?.id === contact.id ? 'active' : ''}`}
+                                onClick={() => handleSelectContact(contact)}
+                            >
+                                <div className="contact-avatar">
+                                    <img src={avatarForContact(contact.id)} alt={contact.email} />
+                                </div>
+                                <div className="contact-meta">
+                                    <div className="contact-name">{contact.email}</div>
+                                    <div className="contact-preview">
+                                        {contact.public_key?.x?.substring(0, 16)}...
+                                    </div>
+                                </div>
+                                <div className="contact-time-badge">
+                                    <span className="time">Kemarin</span>
+                                    <div className={`contact-dot ${contact.id % 2 === 0 ? 'online' : ''}`}></div>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </aside>
+
+                <main className="chat-main-window">
+                    <header className="chat-main-header">
+                        <div className="chat-header-profile">
+                            {selectedContact ? (
+                                <>
+                                    <img src={avatarForContact(selectedContact.id)} alt={selectedContact.email} className="chat-header-avatar" />
+                                    <div className="chat-header-info">
+                                        <h2 style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{selectedContact.email}</h2>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="chat-header-info">
+                                    <h2 style={{ color: '#8a7767' }}>MeowChat</h2>
+                                </div>
+                            )}
+                        </div>
+                        <div className="chat-header-actions" style={{ position: 'relative' }}>
+                            {selectedContact && (
+                                <button className="icon-btn" type="button">
+                                    <img src={searchIcon} alt="Search" />
+                                </button>
+                            )}
+                            <button className="icon-btn" type="button" onClick={() => setShowMenu(!showMenu)} title="Menu">
+                                ⋮
+                            </button>
+
+                            {showMenu && (
+                                <div className="chat-dropdown-menu">
+                                    {onGoToDashboard && (
+                                        <button type="button" onClick={onGoToDashboard}>
+                                            Dashboard
+                                        </button>
+                                    )}
+                                    {onGoToContacts && (
+                                        <button type="button" onClick={onGoToContacts}>
+                                            Daftar Kontak
+                                        </button>
+                                    )}
+                                    {onGoToProfile && (
+                                        <button type="button" onClick={onGoToProfile}>
+                                            Profile
+                                        </button>
+                                    )}
+                                    <button type="button" onClick={handleLogout} className="danger">
+                                        Log Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    {selectedContact ? (
+                        <>
+                            <div className="chat-messages paw-bg" id="chat-messages-area">
+                                {messages.length === 0 && (
+                                    <div className="chat-empty-chat">
+                                        <div className="chat-empty-note">
+                                            <strong>— ENCRYPTED CHANNEL ESTABLISHED —</strong>
+                                            <span>Pesan dienkripsi end-to-end.</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {messages.map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className={`chat-message-row ${msg.sender_id === currentUser.id ? 'sent' : 'received'}`}
+                                    >
+                                        <div className={`chat-bubble ${msg.decryptError ? 'error' : ''}`}>
+                                            <div className="chat-message-text">{msg.plaintext}</div>
+                                            <div className="chat-message-meta">
+                                                <span>{formatTime(msg.timestamp)}</span>
+                                                {!msg.decryptError && <span>✓✓</span>}
+                                                {msg.decryptError && <span className="warn">⚠</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            {cryptoStatus && <div className="crypto-status">{cryptoStatus}</div>}
+                            {error && <div className="chat-error">{error}</div>}
+
+                            <form className="chat-input-area" onSubmit={handleSendMessage}>
+                                <input
+                                    type="text"
+                                    value={messageInput}
+                                    onChange={(e) => setMessageInput(e.target.value)}
+                                    placeholder="Ketik pesan..."
+                                    disabled={sending}
+                                    id="chat-message-input"
+                                    autoComplete="off"
+                                />
+                                <button
+                                    className="chat-send-plane"
+                                    type="submit"
+                                    disabled={sending || !messageInput.trim()}
+                                    id="chat-send-button"
+                                    title="Kirim Pesan"
+                                >
+                                    ➤
+                                </button>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="chat-empty-chat">
+                            <div className="chat-empty-note">
+                                <strong>Pilih kontak untuk mulai chat</strong>
+                                <span>Semua pesan akan dienkripsi otomatis.</span>
+                            </div>
+                        </div>
+                    )}
+                </main>
             </div>
         </section>
     );
