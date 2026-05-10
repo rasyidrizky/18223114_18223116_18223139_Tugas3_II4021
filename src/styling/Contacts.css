@@ -1,0 +1,488 @@
+.contacts-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding: 22px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', sans-serif;
+    background:
+        radial-gradient(circle at top, rgba(255, 251, 244, 0.95), rgba(247, 235, 221, 0.72) 40%, rgba(239, 224, 206, 0.95) 100%),
+        linear-gradient(180deg, #fff8f0 0%, #f3e4d3 100%);
+}
+
+.contacts-page::before {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border: 1px solid rgba(198, 177, 158, 0.42);
+    border-radius: 28px;
+    pointer-events: none;
+}
+
+.contacts-page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(205, 185, 160, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(205, 185, 160, 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.34;
+    pointer-events: none;
+}
+
+.contacts-shell {
+    position: relative;
+    z-index: 1;
+    width: min(1420px, 100%);
+    margin: 0 auto;
+    min-height: calc(100vh - 44px);
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 18px;
+}
+
+
+.contacts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.contacts-title h1 {
+    margin: 0;
+    color: #4b3b31;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+}
+
+.contacts-title p {
+    margin: 6px 0 0;
+    color: #8a6e5f;
+    font-size: 12px;
+}
+
+.contacts-add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    border-radius: 12px;
+    border: 1px solid rgba(214, 187, 163, 0.78);
+    background: rgba(255, 252, 248, 0.96);
+    color: #6d4e3c;
+    padding: 0 14px;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.contacts-add-button span {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #e9ddd2;
+    color: #6d4e3c;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.contacts-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(214, 187, 163, 0.72);
+    background: #fffdfb;
+    padding: 0 14px 0 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.contacts-search img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    flex: 0 0 16px;
+}
+
+.contacts-search input {
+    width: 100%;
+    height: 40px;
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+    color: #4a3930;
+    padding: 0;
+    outline: none;
+}
+
+.contacts-error {
+    margin-bottom: 12px;
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 237, 229, 0.94);
+    border: 1px solid rgba(222, 180, 161, 0.75);
+    color: #a15840;
+}
+
+.contacts-list {
+    display: grid;
+    gap: 12px;
+}
+
+.contacts-card {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    border-radius: 16px;
+    border: 1px solid rgba(224, 208, 190, 0.7);
+    background: rgba(255, 253, 250, 0.97);
+    padding: 10px 16px 10px 12px;
+}
+
+.contacts-card-button {
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+    width: 100%;
+    text-align: left;
+    padding-right: 16px;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.contacts-card-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(180, 158, 138, 0.9);
+    box-shadow: 0 10px 24px rgba(111, 82, 58, 0.08);
+}
+
+.contacts-card-button:focus-visible {
+    outline: 2px solid rgba(77, 168, 107, 0.28);
+    outline-offset: 2px;
+}
+
+.contacts-card-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(211, 188, 168, 0.56);
+    background: #fff;
+}
+
+.contacts-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contacts-card-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.contacts-card-copy strong {
+    color: #49372e;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.contacts-card-copy span {
+    color: #7d6b5d;
+    font-size: 11px;
+}
+
+.contacts-card-copy small {
+    color: #8a7767;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.contacts-card-status {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d6c7bb;
+    justify-self: end;
+}
+
+.contacts-card-status.online {
+    background: #4da86b;
+    box-shadow: 0 0 0 3px rgba(77, 168, 107, 0.12);
+}
+
+.contacts-empty {
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+    text-align: center;
+    color: #8a7767;
+    padding: 24px 18px 10px;
+}
+
+.contacts-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(73, 58, 48, 0.18);
+    backdrop-filter: blur(4px);
+}
+
+.contacts-modal-window {
+    width: min(520px, 100%);
+    border: 2px solid #8f6d52;
+    background: linear-gradient(180deg, #f3e3cf 0%, #fff8ef 14%, #fffdf8 100%);
+    box-shadow: 0 24px 40px rgba(61, 48, 40, 0.22);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.contacts-modal-add {
+    width: min(460px, 100%);
+}
+
+.contacts-modal-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 6px;
+    background: linear-gradient(180deg, #b99372 0%, #9f7658 100%);
+    border-bottom: 2px solid #7f5e43;
+}
+
+.contacts-modal-window-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.contacts-modal-window-controls span {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #f0d6a6;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.16);
+}
+
+.contacts-modal-close {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #84654d;
+    border-radius: 3px;
+    background: #f4e6d5;
+    color: #6a4d37;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 900;
+    display: grid;
+    place-items: center;
+}
+
+.contacts-modal-body {
+    padding: 26px 28px 24px;
+}
+
+.contacts-modal-header {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+}
+
+.contacts-modal-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid rgba(143, 109, 82, 0.32);
+    background: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.contacts-modal-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contacts-modal-copy {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.contacts-modal-copy.full {
+    grid-column: 1 / -1;
+}
+
+.contacts-modal-copy h2 {
+    margin: 0;
+    color: #4b3b31;
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.contacts-modal-copy p {
+    margin: 0;
+    color: #6c5a4d;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.contacts-modal-copy span {
+    color: #8a7767;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.contacts-modal-error {
+    margin-top: 18px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #fff1df;
+    border: 1px solid #c79d74;
+    color: #7a5337;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.contacts-modal-note {
+    margin-top: 12px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(242, 227, 207, 0.72);
+    border: 1px solid rgba(162, 126, 93, 0.35);
+    color: #6c5a4d;
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 700;
+}
+
+.contacts-modal-note.muted {
+    margin-top: 14px;
+    background: rgba(242, 227, 207, 0.52);
+}
+
+.contacts-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.contacts-modal-button {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid #8a6a50;
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.contacts-modal-button.primary {
+    background: linear-gradient(180deg, #f3dfca 0%, #dfc09f 100%);
+    color: #5b412d;
+}
+
+.contacts-modal-button.secondary {
+    background: #fff8ef;
+    color: #5b514a;
+    border-color: rgba(150, 132, 115, 0.55);
+}
+
+.contacts-modal-button:disabled {
+    opacity: 0.66;
+    cursor: not-allowed;
+}
+
+.contacts-modal-field {
+    display: grid;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.contacts-modal-field span {
+    color: #4b3b31;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.contacts-modal-field input {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 132, 115, 0.52);
+    background: #fffdf8;
+    padding: 0 12px;
+    color: #4a3930;
+    outline: none;
+}
+
+@media (max-width: 1200px) {
+    .contacts-shell {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .contacts-page {
+        padding: 14px;
+    }
+
+    .contacts-main {
+        border-radius: 22px;
+        padding: 12px;
+    }
+
+    .contacts-panel {
+        border-radius: 20px;
+        padding: 12px;
+    }
+
+    .contacts-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .contacts-card {
+        grid-template-columns: 48px minmax(0, 1fr) 10px;
+    }
+
+    .contacts-card-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .contacts-modal-backdrop {
+        padding: 12px;
+    }
+
+    .contacts-modal-body {
+        padding: 20px 18px 18px;
+    }
+
+    .contacts-modal-header {
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .contacts-modal-avatar {
+        width: 72px;
+        height: 72px;
+    }
+}

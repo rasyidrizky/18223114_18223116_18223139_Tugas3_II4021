@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import authService from '../services/AuthService';
 import CryptoClient from '../services/CryptoClient';
+import mailIcon from '../assets/mail.png';
+import passwordIcon from '../assets/password.png';
+import pawIcon from '../assets/paw.png';
+import floatingCat from '../assets/kucingngambang.png';
+import '../styling/Login.css';
 
 export default function Login({ onGoToRegister, onLoginSuccess }) {
     const [email, setEmail] = useState('');
@@ -47,63 +52,43 @@ export default function Login({ onGoToRegister, onLoginSuccess }) {
     };
 
     return (
-        <section className="auth-page login-bg">
-            <div className="top-brand">
-                <span>STEI ITB CRYPTO</span>
-                <span className="top-chip">LOGIN TERMINAL</span>
-            </div>
+        <section className="login-page">
+            <div className="login-box">
+                <img className="login-cat" src={floatingCat} alt="Kucing ngambang" />
 
-            <div className="login-layout">
-                <div className="login-info">
-                    <div>
-                        <div className="status-title">SECURE ACCESS</div>
-                        <div className="node-text">NODE_ALPHA_01_CONNECTED</div>
-
-                        <div className="feature-list">
-                            <div>⬢ AES-256 SESSION ENCRYPTION</div>
-                            <div>⬢ ECDSA P-256 SIGNING</div>
-                            <div>⬢ JWT GENERATION ENABLED</div>
-                        </div>
+                <div className="login-card">
+                    <div className="login-title-row">
+                        <h1>meowchat</h1>
+                        <span className="login-title-paw" aria-hidden="true">🐾</span>
                     </div>
+                    <p>Selamat datang kembali!</p>
 
-                    <div className="notice-box">
-                        SYSTEM_NOTICE:<br />
-                        This terminal session will generate a JSON Web Token via
-                        ECDSA cryptographic curves.
-                    </div>
-                </div>
-
-                <div className="auth-panel">
-                    <div className="panel-title">LOGIN_TERMINAL</div>
-                    <div className="panel-line"></div>
-
-                    <form className="auth-form" onSubmit={handleLogin}>
-                        <div>
-                            <div className="form-label">INSTITUTIONAL EMAIL</div>
+                    <form onSubmit={handleLogin}>
+                        <label className="input-wrap">
+                            <img src={mailIcon} alt="" />
                             <input
-                                className="auth-input"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                placeholder="user@itb.ac.id"
+                                placeholder="Email"
                             />
-                        </div>
+                        </label>
 
-                        <div>
-                            <div className="form-label">MASTER PASSWORD</div>
+                        <label className="input-wrap">
+                            <img src={passwordIcon} alt="" />
                             <input
-                                className="auth-input"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                placeholder="********"
+                                placeholder="Password"
                             />
-                        </div>
+                        </label>
 
-                        <button className="auth-submit" type="submit">
-                            EXECUTE_LOGIN.EXE
+                        <button className="login-btn" type="submit">
+                            <img className="login-btn-paw" src={pawIcon} alt="" />
+                            <span>LOGIN</span>
                         </button>
                     </form>
 
@@ -113,18 +98,19 @@ export default function Login({ onGoToRegister, onLoginSuccess }) {
                         </p>
                     )}
 
-                    <div className="auth-extra">
-                        <span>NEW_RECRUIT?</span>
-                        <button className="text-button" type="button" onClick={onGoToRegister}>
-                            CREATE_ACCOUNT
-                        </button>
+                    <div className="register-text">
+                        <span>Belum punya akun?</span>{' '}
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onGoToRegister();
+                            }}
+                        >
+                            Daftar di sini
+                        </a>
                     </div>
                 </div>
-            </div>
-
-            <div className="auth-footer">
-                <span>STEI ITB CRYPTO</span>
-                <span>SYSTEM STATUS: ACTIVE</span>
             </div>
         </section>
     );

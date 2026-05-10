@@ -1,29 +1,84 @@
 import MessageModel from '../models/MessageModel.js';
 import UserModel from '../models/UserModel.js';
+import ContactModel from '../models/ContactModel.js';
 
 class MessageController {
     constructor() {
         this.messageModel = new MessageModel();
         this.userModel = new UserModel();
+        this.contactModel = new ContactModel();
     }
 
     // GET /api/messages/contacts
-    // mengambil semua user lain sebagai daftar kontak
+    // mengambil semua user lain sebagai daftar kontak dan menandai yang sudah disimpan
     getContacts = async (req, res) => {
         try {
             const currentUserId = Number(req.user.sub);
-            const users = this.userModel.findAllExcept(currentUserId);
+            const users = this.contactModel.getContactsForUser(currentUserId);
 
-            const contacts = users.map(user => ({
+            const contacts = users.map((user) => ({
                 id: user.id,
                 email: user.email,
-                public_key: JSON.parse(user.public_key)
+                public_key: JSON.parse(user.public_key),
+                is_added: Boolean(user.is_added)
             }));
 
             res.status(200).json({ contacts });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: '[DEBUG] Failed to fetch contacts' });
+        }
+    }
+
+    // POST /api/messages/contacts
+    // menambahkan kontak ke daftar user yang login
+    addContact = async (req, res) => {
+        try {
+            const currentUserId = Number(req.user.sub);
+            const { contact_id, email } = req.body;
+
+            let contact = null;
+
+            if (contact_id) {
+                contact = this.userModel.findById(Number(contact_id));
+            } else if (email) {
+                contact = this.contactModel.findByEmailForUser(currentUserId, email);
+            }
+
+            if (!contact) {
+                return res.status(404).json({ error: '[DEBUG] Contact not found' });
+            }
+
+            if (Number(contact.id) === currentUserId) {
+                return res.status(400).json({ error: '[DEBUG] Cannot add yourself as a contact' });
+            }
+
+            if (this.contactModel.isContactAdded(currentUserId, Number(contact.id))) {
+                return res.status(409).json({
+                    error: '[DEBUG] Contact already added',
+                    contact: {
+                        id: contact.id,
+                        email: contact.email,
+                        public_key: JSON.parse(contact.public_key),
+                        is_added: true
+                    }
+                });
+            }
+
+            this.contactModel.addContact(currentUserId, Number(contact.id));
+
+            res.status(201).json({
+                message: '[DEBUG] Contact added',
+                contact: {
+                    id: contact.id,
+                    email: contact.email,
+                    public_key: JSON.parse(contact.public_key),
+                    is_added: true
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: '[DEBUG] Failed to add contact' });
         }
     }
 

@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import CryptoClient from '../services/CryptoClient';
 import authService from '../services/AuthService';
+import '../styling/Register.css';
+import sleepingCat from '../assets/kucingtidur.png';
+import mail from '../assets/mail.png';
+import passwordIcon from '../assets/password.png';
+import paw from '../assets/paw.png';
 
 export default function Register({ onGoToLogin }) {
     const [email, setEmail] = useState('');
@@ -9,215 +14,108 @@ export default function Register({ onGoToLogin }) {
     const [message, setMessage] = useState('');
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
-    const [resultDetail, setResultDetail] = useState(null);
 
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setResultDetail(null);
 
         if (password !== confirmPassword) {
             setLoading(false);
             setStatus('error');
             setMessage('Registrasi gagal');
-
-            setResultDetail({
-                error: 'Password confirmation does not match',
-                statusCode: 'Client validation',
-                email: email
-            });
-
             return;
         }
 
         try {
-            const key_pair = await CryptoClient.generate_keypairECDH();
-            const exportedPubKey = await window.crypto.subtle.exportKey("jwk", key_pair.publicKey);
-            const { ciphertext, iv, key_salt } = await CryptoClient.encrypt_pk(key_pair.privateKey, password);
+            const keyPair = await CryptoClient.generate_keypairECDH();
+            const exportedPubKey = await window.crypto.subtle.exportKey('jwk', keyPair.publicKey);
+            const { ciphertext, iv, key_salt } = await CryptoClient.encrypt_pk(keyPair.privateKey, password);
 
-            const result = await authService.register({
-                email: email,
-                password: password,
+            await authService.register({
+                email,
+                password,
                 public_key: exportedPubKey,
                 encrypted_private_key: ciphertext,
                 aes_iv: iv,
-                key_salt: key_salt
+                key_salt
             });
 
             setStatus('success');
             setMessage('Registrasi berhasil');
-
-            setResultDetail({
-                email: email,
-                serverMessage: result.message,
-                keyPair: 'ECDH P-256 generated',
-                privateKey: 'Encrypted with AES-256-GCM',
-                publicKey: exportedPubKey.kty + ' / ' + exportedPubKey.crv,
-                ciphertextLength: ciphertext.length,
-                ivLength: iv.length,
-                keySaltLength: key_salt.length
-            });
         } catch (error) {
             setStatus('error');
-            setMessage('Registrasi gagal');
-
-            setResultDetail({
-                error: error.response?.data?.error || error.message || 'Unknown error',
-                statusCode: error.response?.status || 'No response',
-                email: email
-            });
+            setMessage(error.response?.data?.error || 'Registrasi gagal');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <section className="auth-page register-bg">
-            <div className="top-brand">
-                <span>STEI ITB CRYPTO</span>
-                <span className="top-chip">REGISTRATION TERMINAL</span>
-            </div>
+        <section className="register-page">
+            <div className="register-box">
+                <img className="register-cat" src={sleepingCat} alt="Kucing tidur" />
 
-            <div className="register-layout">
-                <div className="register-panel">
-                    <div className="panel-title">SYSTEM ACCESS</div>
-                    <div className="panel-line"></div>
+                <div className="register-card">
+                    <h1>Buat Akun</h1>
+                    <p>Bergabunglah dengan MeowChat!</p>
 
-                    <p className="register-subtitle">
-                        Initialize new cryptographic identity on the network.
-                    </p>
-
-                    <form className="auth-form" onSubmit={handleRegister}>
-                        <div>
-                            <div className="form-label">INSTITUTIONAL EMAIL</div>
+                    <form onSubmit={handleRegister}>
+                        <label className="register-input-wrap">
+                            <img src={mail} alt="" />
                             <input
-                                className="auth-input"
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                placeholder="user@itb.ac.id"
+                                placeholder="Email"
                             />
-                        </div>
+                        </label>
 
-                        <div>
-                            <div className="form-label">MASTER PASSWORD</div>
+                        <label className="register-input-wrap">
+                            <img src={passwordIcon} alt="" />
                             <input
-                                className="auth-input"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                placeholder="********"
+                                placeholder="Password"
                             />
-                        </div>
+                        </label>
 
-                        <div>
-                            <div className="form-label">CONFIRM MASTER PASSWORD</div>
+                        <label className="register-input-wrap">
+                            <img src={passwordIcon} alt="" />
                             <input
-                                className="auth-input"
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
-                                placeholder="********"
+                                placeholder="Konfirmasi Password"
                             />
-                        </div>
+                        </label>
 
-                        <div className="security-box">
-                            SECURITY PROTOCOL: Your private key will be locally encrypted
-                            with AES-256-GCM using your master password before being stored.
-                        </div>
-
-                        <button className="auth-submit" type="submit" disabled={loading}>
-                            {loading ? 'Sedang memproses...' : 'Daftar'}
+                        <button className="register-btn" type="submit" disabled={loading}>
+                            <img className="register-btn-paw" src={paw} alt="" />
+                            <span>{loading ? 'Sedang memproses...' : 'Daftar'}</span>
                         </button>
                     </form>
 
                     {message && (
-                        <p className={status === 'success' ? 'status-success' : 'status-error'}>
+                        <p className={status === 'success' ? 'register-status-success' : 'register-status-error'}>
                             {message}
                         </p>
                     )}
 
-                    {resultDetail && status === 'success' && (
-                        <div className="result-box success-box">
-                            <div>STATUS: SUCCESS</div>
-                            <div>EMAIL: {resultDetail.email}</div>
-                            <div>SERVER: {resultDetail.serverMessage}</div>
-                            <div>KEY PAIR: {resultDetail.keyPair}</div>
-                            <div>PUBLIC KEY: {resultDetail.publicKey}</div>
-                            <div>PRIVATE KEY: {resultDetail.privateKey}</div>
-                            <div>CIPHERTEXT LENGTH: {resultDetail.ciphertextLength}</div>
-                            <div>IV LENGTH: {resultDetail.ivLength}</div>
-                            <div>SALT LENGTH: {resultDetail.keySaltLength}</div>
-                        </div>
-                    )}
-
-                    {resultDetail && status === 'error' && (
-                        <div className="result-box error-box">
-                            <div>STATUS: FAILED</div>
-                            <div>EMAIL: {resultDetail.email}</div>
-                            <div>HTTP STATUS: {resultDetail.statusCode}</div>
-                            <div>ERROR: {resultDetail.error}</div>
-                        </div>
-                    )}
-
-                    <div className="auth-extra">
-                        <span>ALREADY_REGISTERED?</span>
-                        <button className="text-button" type="button" onClick={onGoToLogin}>
-                            BACK_TO_LOGIN
+                    <div className="register-link-text">
+                        <span>Sudah punya akun?</span>{' '}
+                        <button
+                            type="button"
+                            className="register-link-button"
+                            onClick={onGoToLogin}
+                        >
+                            Login di sini
                         </button>
                     </div>
                 </div>
-
-                <div className="crypto-panel">
-                    <div className="panel-title">CRYPTOGRAPHIC ENGINE</div>
-                    <div className="panel-line"></div>
-
-                    <div className="progress-box">
-                        <div className="progress-title">
-                            {loading ? 'Generating ECDH Key Pair (P-256)' : 'ECDH Engine Ready'}
-                        </div>
-
-                        <div className="progress-bar">
-                            <span className="active"></span>
-                            <span className="active"></span>
-                            <span className="active"></span>
-                            <span className={loading ? 'active' : ''}></span>
-                            <span className={loading ? 'active' : ''}></span>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
-
-                    <div className="terminal-log">
-                        <div>&gt; Initializing entropy source...</div>
-                        <div>&gt; Gathering environmental noise...</div>
-                        <div>&gt; Performing Curve P-256 scalar multiplication...</div>
-                        <div className="warning">&gt; Waiting for secure registration...</div>
-                    </div>
-
-                    <div className="mini-grid">
-                        <div className="mini-card">
-                            NODE STATUS
-                            <strong>ACTIVE</strong>
-                        </div>
-
-                        <div className="mini-card">
-                            AUTH METHOD
-                            <strong>ECDH-P256</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="auth-footer">
-                <span>STEI ITB CRYPTO</span>
-                <span>SYSTEM STATUS: ACTIVE</span>
             </div>
         </section>
     );

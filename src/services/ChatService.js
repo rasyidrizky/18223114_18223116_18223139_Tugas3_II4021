@@ -41,6 +41,18 @@ class ChatService {
             throw error;
         }
     }
+
+    async addContact(data) {
+        try {
+            const response = await axios.post(`${this.baseURL}/contacts`, data, {
+                headers: authService.getAuthHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.log(error.response?.data || error.toString());
+            throw error;
+        }
+    }
 }
 
 export default new ChatService();

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Contacts from './pages/Contacts.jsx';
 import Chat from './pages/Chat.jsx';
 import authService from './services/AuthService.js';
 import CryptoClient from './services/CryptoClient.js';
@@ -9,6 +11,7 @@ import './App.css';
 function App() {
     const [page, setPage] = useState('login');
     const [chatData, setChatData] = useState(null);
+    const [chatTargetId, setChatTargetId] = useState(null);
 
     useEffect(() => {
         const restoreSession = async () => {
@@ -25,7 +28,7 @@ function App() {
                 user: session.user,
                 privateKey
             });
-            setPage('chat');
+            setPage('dashboard');
         };
 
         restoreSession();
@@ -33,12 +36,27 @@ function App() {
 
     const handleLoginSuccess = (userData) => {
         setChatData(userData);
-        setPage('chat');
+        setPage('dashboard');
     };
 
     const handleLogout = () => {
         setChatData(null);
         setPage('login');
+    };
+
+    const handleGoToChat = (contactId = null) => {
+        setChatTargetId(contactId);
+        setPage('chat');
+    };
+
+    const handleGoToContacts = () => {
+        setChatTargetId(null);
+        setPage('contacts');
+    };
+
+    const handleGoToDashboard = () => {
+        setChatTargetId(null);
+        setPage('dashboard');
     };
 
     return (
@@ -54,10 +72,30 @@ function App() {
                 <Register onGoToLogin={() => setPage('login')} />
             )}
 
+            {page === 'dashboard' && chatData && (
+                <Dashboard
+                    currentUser={chatData.user}
+                    onGoToContacts={handleGoToContacts}
+                    onGoToChat={handleGoToChat}
+                    onLogout={handleLogout}
+                />
+            )}
+
+            {page === 'contacts' && chatData && (
+                <Contacts
+                    currentUser={chatData.user}
+                    onGoToDashboard={handleGoToDashboard}
+                    onGoToChat={handleGoToChat}
+                    onLogout={handleLogout}
+                />
+            )}
+
             {page === 'chat' && chatData && (
                 <Chat
                     currentUser={chatData.user}
                     privateKey={chatData.privateKey}
+                    initialContactId={chatTargetId}
+                    onGoToDashboard={handleGoToDashboard}
                     onLogout={handleLogout}
                 />
             )}
