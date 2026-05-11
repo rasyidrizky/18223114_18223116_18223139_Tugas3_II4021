@@ -30,6 +30,39 @@ class MessageController {
         }
     }
 
+    // GET /api/messages/search?email=...
+    // mencari user berdasarkan email untuk ditambahkan sebagai kontak
+    searchUser = async (req, res) => {
+        try {
+            const currentUserId = Number(req.user.sub);
+            const email = req.query.email?.trim().toLowerCase();
+
+            if (!email) {
+                return res.status(400).json({ error: '[DEBUG] Email parameter is required' });
+            }
+
+            const user = this.contactModel.findByEmailForUser(currentUserId, email);
+
+            if (!user) {
+                return res.status(404).json({ error: '[DEBUG] User not found' });
+            }
+
+            const isAdded = this.contactModel.isContactAdded(currentUserId, user.id);
+
+            res.status(200).json({
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    public_key: JSON.parse(user.public_key),
+                    is_added: isAdded
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: '[DEBUG] Failed to search user' });
+        }
+    }
+
     // POST /api/messages/contacts
     // menambahkan kontak ke daftar user yang login
     addContact = async (req, res) => {

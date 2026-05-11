@@ -18,6 +18,18 @@ class ChatService {
         }
     }
 
+    async searchUser(email) {
+        try {
+            const response = await axios.get(`${this.baseURL}/search?email=${encodeURIComponent(email)}`, {
+                headers: authService.getAuthHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.log(error.response?.data || error.toString());
+            throw error;
+        }
+    }
+
     async getMessages(partnerId) {
         try {
             const response = await axios.get(`${this.baseURL}/conv/${partnerId}`, {

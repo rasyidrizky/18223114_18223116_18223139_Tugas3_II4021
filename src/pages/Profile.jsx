@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardSidebar from '../components/DashboardSidebar.jsx';
 import '../styling/Profile.css';
 import homeIcon from '../assets/home.png';
@@ -21,30 +21,59 @@ export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, 
     const [avatarIndex, setAvatarIndex] = useState(0);
     const [customAvatarUrl, setCustomAvatarUrl] = useState(null);
     const fileInputRef = useRef(null);
+    const didHydrateProfile = useRef(false);
+
+    const saveProfileToStorage = (profileData) => {
+        if (!currentUser) {
+            return;
+        }
+
+        localStorage.setItem(`profile_${currentUser.id}`, JSON.stringify(profileData));
+    };
 
     // Load initial profile data from localStorage or fallback
     useEffect(() => {
         if (currentUser) {
             const savedProfile = localStorage.getItem(`profile_${currentUser.id}`);
-            if (savedProfile) {
-                const parsed = JSON.parse(savedProfile);
-                setName(parsed.name || 'Nama Pengguna');
-                setAvatarIndex(parsed.avatarIndex !== undefined ? parsed.avatarIndex : currentUser.id % AVATAR_POOL.length);
-                setCustomAvatarUrl(parsed.customAvatarUrl || null);
-            } else {
+            try {
+                if (savedProfile) {
+                    const parsed = JSON.parse(savedProfile);
+                    setName(parsed.name || 'Nama Pengguna');
+                    setAvatarIndex(parsed.avatarIndex !== undefined ? parsed.avatarIndex : currentUser.id % AVATAR_POOL.length);
+                    setCustomAvatarUrl(parsed.customAvatarUrl || null);
+                } else {
+                    setName('Nama Pengguna');
+                    setAvatarIndex(currentUser.id % AVATAR_POOL.length);
+                    setCustomAvatarUrl(null);
+                }
+            } catch {
+                setName('Nama Pengguna');
                 setAvatarIndex(currentUser.id % AVATAR_POOL.length);
+                setCustomAvatarUrl(null);
             }
+
+            didHydrateProfile.current = true;
         }
     }, [currentUser]);
 
-    const handleSave = () => {
-        if (currentUser) {
-            localStorage.setItem(`profile_${currentUser.id}`, JSON.stringify({
-                name: name.trim() || 'Nama Pengguna',
-                avatarIndex,
-                customAvatarUrl
-            }));
+    useEffect(() => {
+        if (!currentUser || !didHydrateProfile.current) {
+            return;
         }
+
+        saveProfileToStorage({
+            name: name.trim() || 'Nama Pengguna',
+            avatarIndex,
+            customAvatarUrl
+        });
+    }, [currentUser, name, avatarIndex, customAvatarUrl]);
+
+    const handleSave = () => {
+        saveProfileToStorage({
+            name: name.trim() || 'Nama Pengguna',
+            avatarIndex,
+            customAvatarUrl
+        });
         setIsEditing(false);
     };
 
@@ -70,12 +99,6 @@ export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, 
         { label: 'Profile', icon: profileIcon, active: true },
         { label: 'Log Out', icon: logoutIcon, iconClass: 'dashboard-icon-logout', action: onLogout }
     ];
-
-    const joinDate = useMemo(() => {
-        if (!currentUser?.created_at) return '12 April 2026';
-        const date = new Date(currentUser.created_at);
-        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    }, [currentUser]);
 
     return (
         <section className="profile-page">
@@ -140,10 +163,6 @@ export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, 
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">Email</span>
                                     <span className="profile-detail-value">{currentUser?.email || 'user@mail.com'}</span>
-                                </div>
-                                <div className="profile-detail-row">
-                                    <span className="profile-detail-label">Bergabung Sejak</span>
-                                    <span className="profile-detail-value">{joinDate}</span>
                                 </div>
                             </div>
 

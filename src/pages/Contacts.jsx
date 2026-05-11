@@ -25,6 +25,8 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onG
     const [newContactEmail, setNewContactEmail] = useState('');
     const [modalError, setModalError] = useState('');
     const [savingContact, setSavingContact] = useState(false);
+    const [addContactPreview, setAddContactPreview] = useState(null);
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         const loadContacts = async () => {
@@ -51,18 +53,34 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onG
     }, [contacts]);
 
     const filteredContacts = contacts.filter((contact) =>
-        contact.is_added && contact.email.toLowerCase().includes(searchTerm.toLowerCase())
+        contact.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const addContactPreview = useMemo(() => {
+    useEffect(() => {
         const normalizedEmail = newContactEmail.trim().toLowerCase();
 
         if (!normalizedEmail) {
-            return null;
+            setAddContactPreview(null);
+            return;
         }
 
-        return contacts.find((contact) => contact.email.toLowerCase() === normalizedEmail) || null;
-    }, [contacts, newContactEmail]);
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        const timeout = setTimeout(async () => {
+            try {
+                const data = await chatService.searchUser(normalizedEmail);
+                setAddContactPreview(data.user);
+            } catch (err) {
+                setAddContactPreview(null);
+            }
+        }, 400);
+
+        setSearchTimeout(timeout);
+
+        return () => clearTimeout(timeout);
+    }, [newContactEmail]);
 
     const updateContactInList = (updatedContact) => {
         setContacts((currentContacts) => {
@@ -152,6 +170,7 @@ export default function Contacts({ currentUser, onGoToDashboard, onGoToChat, onG
             setSelectedContact(data.contact);
             setShowAddModal(false);
             setNewContactEmail('');
+            setAddContactPreview(null);
         } catch (err) {
             console.error('[DEBUG] Failed to add contact by email:', err);
             setModalError(err.response?.data?.error || 'Gagal menambahkan kontak.');

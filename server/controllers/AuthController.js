@@ -118,12 +118,28 @@ class AuthController {
                     public_key: JSON.parse(user.public_key),
                     encrypted_private_key: user.encrypted_private_key,
                     aes_iv: user.aes_iv,
-                    key_salt: user.key_salt
+                    key_salt: user.key_salt,
+                    name: user.name,
+                    avatar_index: user.avatar_index,
+                    custom_avatar_url: user.custom_avatar_url
                 }
             });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "[DEBUG] Login failed" });
+        }
+    }
+    updateProfile = async (req, res) => {
+        try {
+            const userId = Number(req.user.sub);
+            const { name, avatar_index, custom_avatar_url } = req.body;
+
+            this.userModel.updateProfile(userId, name, avatar_index, custom_avatar_url);
+
+            res.status(200).json({ message: "[DEBUG] Profile updated successfully" });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "[DEBUG] Failed to update profile" });
         }
     }
 }

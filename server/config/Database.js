@@ -13,6 +13,11 @@ class Database {
             
             this.db.exec(schemaFile);
             
+            // Auto-migration for existing databases
+            try { this.db.exec('ALTER TABLE user ADD COLUMN name TEXT;'); } catch (e) {}
+            try { this.db.exec('ALTER TABLE user ADD COLUMN avatar_index INTEGER DEFAULT 0;'); } catch (e) {}
+            try { this.db.exec('ALTER TABLE user ADD COLUMN custom_avatar_url TEXT;'); } catch (e) {}
+
             Database.instance = this;
         }
 

@@ -32,7 +32,47 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
         contact.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const avatarForContact = (contactId) => contactAvatars[contactId] || AVATAR_POOL[0];
+    const parseTimestamp = (timestamp) => {
+        if (!timestamp) {
+            return null;
+        }
+
+        if (typeof timestamp === 'string') {
+            const sqliteLocalMatch = timestamp.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+
+            if (sqliteLocalMatch) {
+                const [, year, month, day, hour, minute, second] = sqliteLocalMatch;
+                return new Date(
+                    Number(year),
+                    Number(month) - 1,
+                    Number(day),
+                    Number(hour),
+                    Number(minute),
+                    Number(second)
+                );
+            }
+        }
+
+        const parsedDate = new Date(timestamp);
+        return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+    };
+
+    const getAvatarForUser = (userId) => {
+        const savedProfile = localStorage.getItem(`profile_${userId}`);
+
+        if (savedProfile) {
+            try {
+                const parsed = JSON.parse(savedProfile);
+                return parsed.customAvatarUrl || AVATAR_POOL[parsed.avatarIndex !== undefined ? parsed.avatarIndex : userId % AVATAR_POOL.length];
+            } catch {
+                return AVATAR_POOL[userId % AVATAR_POOL.length];
+            }
+        }
+
+        return AVATAR_POOL[userId % AVATAR_POOL.length];
+    };
+
+    const avatarForContact = (contactId) => contactAvatars[contactId] || getAvatarForUser(contactId);
 
     useEffect(() => {
         if (!contacts.length) {
@@ -43,8 +83,7 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
         const nextAvatars = {};
 
         for (const contact of contacts) {
-            const randomIndex = Math.floor(Math.random() * AVATAR_POOL.length);
-            nextAvatars[contact.id] = AVATAR_POOL[randomIndex];
+            nextAvatars[contact.id] = getAvatarForUser(contact.id);
         }
 
         setContactAvatars(nextAvatars);
@@ -216,7 +255,12 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
 
     const formatTime = (timestamp) => {
         try {
-            const date = new Date(timestamp);
+            const date = parseTimestamp(timestamp);
+
+            if (!date) {
+                return timestamp;
+            }
+
             return date.toLocaleTimeString('id-ID', {
                 hour: '2-digit',
                 minute: '2-digit'
@@ -224,6 +268,19 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
         } catch {
             return timestamp;
         }
+    };
+
+    const formatContactBadgeTime = (timestamp) => {
+        const date = parseTimestamp(timestamp);
+
+        if (!date) {
+            return 'Baru';
+        }
+
+        return date.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     };
 
     return (
@@ -274,7 +331,7 @@ export default function Chat({ currentUser, privateKey, initialContactId, onGoTo
                                     </div>
                                 </div>
                                 <div className="contact-time-badge">
-                                    <span className="time">Kemarin</span>
+                                    <span className="time">{formatContactBadgeTime(contact.last_message_at || contact.added_at)}</span>
                                     <div className={`contact-dot ${contact.id % 2 === 0 ? 'online' : ''}`}></div>
                                 </div>
                             </button>

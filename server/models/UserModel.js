@@ -41,7 +41,7 @@ class UserModel {
 
     findAllExcept(userId) {
         try {
-            const command = this.db.prepare('SELECT id, email, public_key FROM user WHERE id != ?');
+            const command = this.db.prepare('SELECT id, email, public_key, name, avatar_index, custom_avatar_url FROM user WHERE id != ?');
             const result = command.all(userId);
 
             return result;
@@ -53,9 +53,20 @@ class UserModel {
 
     findById(userId) {
         try {
-            const command = this.db.prepare('SELECT id, email, public_key FROM user WHERE id = ?');
+            const command = this.db.prepare('SELECT id, email, public_key, name, avatar_index, custom_avatar_url FROM user WHERE id = ?');
             const result = command.get(userId);
 
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    updateProfile(userId, name, avatarIndex, customAvatarUrl) {
+        try {
+            const command = this.db.prepare('UPDATE user SET name = ?, avatar_index = ?, custom_avatar_url = ? WHERE id = ?');
+            const result = command.run(name, avatarIndex, customAvatarUrl, userId);
             return result;
         } catch (error) {
             console.log(error.toString());

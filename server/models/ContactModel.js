@@ -12,15 +12,22 @@ class ContactModel {
                     u.id,
                     u.email,
                     u.public_key,
-                    CASE WHEN c.contact_id IS NULL THEN 0 ELSE 1 END AS is_added
-                 FROM user u
-                 LEFT JOIN contacts c
-                    ON c.user_id = ? AND c.contact_id = u.id
-                 WHERE u.id != ?
-                 ORDER BY is_added DESC, u.email ASC`
+                    c.created_at AS added_at,
+                    (
+                        SELECT MAX(m.timestamp)
+                        FROM messages m
+                        WHERE (m.sender_id = c.user_id AND m.receiver_id = c.contact_id)
+                           OR (m.sender_id = c.contact_id AND m.receiver_id = c.user_id)
+                    ) AS last_message_at,
+                    1 AS is_added
+                 FROM contacts c
+                 INNER JOIN user u
+                    ON u.id = c.contact_id
+                 WHERE c.user_id = ?
+                 ORDER BY COALESCE(last_message_at, c.created_at) DESC, u.email ASC`
             );
 
-            return command.all(userId, userId);
+            return command.all(userId);
         } catch (error) {
             console.log(error.toString());
             throw error;
