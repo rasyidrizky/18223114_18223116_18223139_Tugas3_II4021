@@ -1,16 +1,21 @@
 .chat-page {
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
     position: relative;
     overflow: hidden;
-    padding: 0;
+    padding: 22px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', sans-serif;
     background:
-        radial-gradient(circle at top, rgba(255, 251, 244, 0.94), rgba(248, 239, 229, 0.7) 36%, rgba(241, 226, 210, 0.92) 100%),
-        linear-gradient(180deg, #fff8f0 0%, #f2e2d0 100%);
+        radial-gradient(circle at top, rgba(255, 251, 244, 0.95), rgba(247, 235, 221, 0.72) 40%, rgba(239, 224, 206, 0.95) 100%),
+        linear-gradient(180deg, #fff8f0 0%, #f3e4d3 100%);
 }
 
 .chat-page::before {
-    display: none;
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border: 1px solid rgba(198, 177, 158, 0.42);
+    border-radius: 28px;
+    pointer-events: none;
 }
 
 .chat-page::after {
@@ -28,14 +33,15 @@
 .chat-app-window {
     position: relative;
     z-index: 1;
-    width: 100%;
-    height: 100vh;
+    width: min(1420px, 100%);
+    margin: 0 auto;
+    height: calc(100vh - 44px);
     display: grid;
     grid-template-columns: 320px minmax(0, 1fr);
     background: rgba(255, 252, 248, 0.94);
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    border: 1px solid rgba(203, 182, 164, 0.64);
+    border-radius: 28px;
+    box-shadow: 0 22px 60px rgba(111, 82, 58, 0.1);
     overflow: hidden;
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
