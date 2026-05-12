@@ -76,9 +76,9 @@ export default function Chat({
         return (
           parsed.customAvatarUrl ||
           AVATAR_POOL[
-            parsed.avatarIndex !== undefined
-              ? parsed.avatarIndex
-              : userId % AVATAR_POOL.length
+          parsed.avatarIndex !== undefined
+            ? parsed.avatarIndex
+            : userId % AVATAR_POOL.length
           ]
         );
       } catch {
@@ -112,10 +112,13 @@ export default function Chat({
     loadContacts();
   }, []);
 
+  // Dapatkan ID dari pesan paling bawah
+  const lastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
+
   // auto-scroll ke pesan terbaru
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [lastMessageId, selectedContact?.id]);
 
   // polling pesan setiap 3 detik saat ada kontak terpilih
   useEffect(() => {
