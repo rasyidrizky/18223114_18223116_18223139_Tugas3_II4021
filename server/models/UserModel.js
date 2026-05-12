@@ -1,0 +1,78 @@
+import db_instance from '../config/Database.js'
+
+class UserModel {
+    constructor() {
+        this.db = db_instance.getDatabase();
+    }
+
+    createUser(userData) {
+        try {
+            // create user data to DB
+            const command = this.db.prepare('INSERT INTO user (email, hash_password, salt, key_salt, public_key, encrypted_private_key, aes_iv) VALUES (?, ?, ?, ?, ?, ?, ?)');
+
+            const result = command.run(
+                userData.email,
+                userData.password_hash,
+                userData.salt,
+                userData.key_salt,
+                JSON.stringify(userData.public_key),
+                userData.encrypted_private_key,
+                userData.aes_iv
+            );
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    findByEmail(email) {
+        try {
+            const command = this.db.prepare('SELECT * FROM user WHERE email = ?');
+            const result = command.get(email);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    findAllExcept(userId) {
+        try {
+            const command = this.db.prepare('SELECT id, email, public_key, name, avatar_index, custom_avatar_url FROM user WHERE id != ?');
+            const result = command.all(userId);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    findById(userId) {
+        try {
+            const command = this.db.prepare('SELECT id, email, public_key, name, avatar_index, custom_avatar_url FROM user WHERE id = ?');
+            const result = command.get(userId);
+
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
+    updateProfile(userId, name, avatarIndex, customAvatarUrl) {
+        try {
+            const command = this.db.prepare('UPDATE user SET name = ?, avatar_index = ?, custom_avatar_url = ? WHERE id = ?');
+            const result = command.run(name, avatarIndex, customAvatarUrl, userId);
+            return result;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+}
+
+export default UserModel;

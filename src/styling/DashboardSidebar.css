@@ -1,0 +1,120 @@
+.dashboard-sidebar {
+    background: rgba(255, 250, 244, 0.94);
+    border: 1px solid rgba(203, 182, 164, 0.64);
+    border-radius: 28px;
+    box-shadow: 0 22px 60px rgba(111, 82, 58, 0.1);
+    padding: 14px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+}
+
+.dashboard-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 900;
+    color: #4d3b31;
+    font-size: 17px;
+}
+
+.dashboard-brand img {
+    width: 28px;
+    height: 28px;
+}
+
+.dashboard-sidebar-nav {
+    display: grid;
+    gap: 10px;
+}
+
+.dashboard-sidebar-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: transparent;
+    color: #745d4e;
+    text-align: left;
+    padding: 9px 11px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.dashboard-sidebar-button.active {
+    background: rgba(252, 236, 222, 0.95);
+    border-color: rgba(214, 187, 163, 0.84);
+    color: #6d4e3c;
+}
+
+.dashboard-sidebar-button:disabled {
+    opacity: 0.88;
+}
+
+.dashboard-sidebar-button img {
+    width: 20px;
+    height: 20px;
+}
+
+.dashboard-sidebar-button img.dashboard-icon-logout {
+    width: 22px;
+    height: 22px;
+}
+
+.dashboard-sidebar-card {
+    margin-top: auto;
+    position: relative;
+    min-height: 164px;
+    border-radius: 22px;
+    background: transparent;
+    overflow: hidden;
+    padding: 6px 0 0;
+}
+
+.dashboard-sidebar-cat {
+    position: absolute;
+    left: 6px;
+    bottom: 4px;
+    width: 200px;
+    opacity: 0.96;
+    filter: drop-shadow(0 12px 16px rgba(77, 65, 99, 0.12));
+}
+
+.dashboard-sidebar-card.variant-kucing {
+    min-height: 170px;
+}
+
+.dashboard-sidebar-cat.variant-kucing {
+    width: 188px;
+    left: 0;
+    bottom: 0;
+}
+
+.dashboard-sidebar-card.variant-blackcat {
+    min-height: 164px;
+}
+
+.dashboard-sidebar-cat.variant-blackcat {
+    width: 200px;
+}
+
+.dashboard-sidebar-card.variant-mask {
+    min-height: 164px;
+}
+
+.dashboard-sidebar-cat.variant-mask {
+    width: 208px;
+    left: 2px;
+    bottom: 0;
+}
+
+@media (max-width: 720px) {
+    .dashboard-sidebar {
+        border-radius: 22px;
+        padding: 12px;
+    }
+}
