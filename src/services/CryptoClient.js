@@ -172,6 +172,8 @@ class CryptoClient {
             256
         );
 
+        // Untuk pengujian pembentukan kunci komunikasi (ECDH dan KDF)
+        //console.log("Shared Secret:", this.arraybuffer_to_Base64(sharedSecretBits));
         return sharedSecretBits;
     }
 
@@ -226,6 +228,8 @@ class CryptoClient {
             ["sign", "verify"]
         );
 
+        // Untuk pengujian pembentukan kunci komunikasi (ECDH dan KDF)
+        // console.log("AES & HMAC Keys generated successfully", aesKey, hmacKey);
         return { aesKey, hmacKey };
     }
 
