@@ -65,6 +65,18 @@ class ChatService {
             throw error;
         }
     }
+
+    async getConversationCount() {
+        try {
+            const response = await axios.get(`${this.baseURL}/conv-count`, {
+                headers: authService.getAuthHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.log(error.response?.data || error.toString());
+            throw error;
+        }
+    }
 }
 
 export default new ChatService();

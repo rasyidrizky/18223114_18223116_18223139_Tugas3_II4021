@@ -26,21 +26,26 @@ export default function Dashboard({
   onLogout,
 }) {
   const [contacts, setContacts] = useState([]);
+  const [conversationCount, setConversationCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadContacts = async () => {
+    const loadDashboardData = async () => {
       try {
-        const data = await chatService.getContacts();
-        setContacts(data.contacts || []);
+        const [contactsData, convData] = await Promise.all([
+          chatService.getContacts(),
+          chatService.getConversationCount(),
+        ]);
+        setContacts(contactsData.contacts || []);
+        setConversationCount(convData.count ?? 0);
       } catch (err) {
-        console.error("Failed to load dashboard contacts:", err);
-        setError("Gagal memuat daftar kontak.");
+        console.error("Failed to load dashboard data:", err);
+        setError("Gagal memuat data dashboard.");
       }
     };
 
-    loadContacts();
+    loadDashboardData();
   }, []);
 
   const contactAvatars = useMemo(() => {
@@ -80,7 +85,7 @@ export default function Dashboard({
     },
     {
       label: "Percakapan",
-      value: Math.max(1, Math.min(contacts.length, 5)),
+      value: conversationCount,
       note: "Lanjutkan chat-mu",
       tone: "violet",
       icon: chatIcon,
@@ -97,18 +102,10 @@ export default function Dashboard({
   ];
 
   const activityItems = useMemo(() => {
-    const timeLabels = ["10:30", "09:15", "Kemarin"];
 
     return filteredContacts.slice(0, 3).map((contact, index) => ({
       id: contact.id,
       name: contact.email,
-      text:
-        index === 0
-          ? "Hai! Selamat datang di MeowChat ✨"
-          : index === 1
-            ? "Oke, siap nanti!"
-            : "Thanks!",
-      time: timeLabels[index],
       avatar: contactAvatars[contact.id],
     }));
   }, [contactAvatars, filteredContacts]);

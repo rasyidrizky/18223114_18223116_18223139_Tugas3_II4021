@@ -9,6 +9,19 @@ class MessageController {
     this.contactModel = new ContactModel();
   }
 
+  // GET /api/messages/conv-count
+  // menghitung jumlah percakapan unik (partner berbeda) milik user yang login
+  getConversationCount = async (req, res) => {
+    try {
+      const currentUserId = Number(req.user.sub);
+      const count = this.messageModel.getConversationCount(currentUserId);
+      res.status(200).json({ count });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to get conversation count" });
+    }
+  };
+
   // GET /api/messages/contacts
   // mengambil semua user terdaftar (selain user yang sedang login) sebagai daftar kontak
   getContacts = async (req, res) => {

@@ -26,6 +26,25 @@ class MessageModel {
         }
     }
 
+    getConversationCount(userId) {
+        try {
+            const command = this.db.prepare(
+                `SELECT COUNT(DISTINCT partner_id) AS count
+                 FROM (
+                     SELECT receiver_id AS partner_id FROM messages WHERE sender_id = ?
+                     UNION
+                     SELECT sender_id AS partner_id FROM messages WHERE receiver_id = ?
+                 )`
+            );
+
+            const result = command.get(userId, userId);
+            return result?.count ?? 0;
+        } catch (error) {
+            console.log(error.toString());
+            throw error;
+        }
+    }
+
     getConversation(userId1, userId2) {
         try {
             const command = this.db.prepare(
