@@ -17,60 +17,66 @@ const AVATAR_POOL = [avatar1, avatar2, avatar3, avatar4, avatar5];
 
 export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, onGoToChat, onLogout }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [name, setName] = useState('Nama Pengguna');
-    const [avatarIndex, setAvatarIndex] = useState(0);
-    const [customAvatarUrl, setCustomAvatarUrl] = useState(null);
+    const getInitialProfile = () => {
+        if (!currentUser) return { name: 'Nama Pengguna', avatarIndex: 0, customAvatarUrl: null };
+        const defaultName = currentUser.email ? currentUser.email.split('@')[0] : 'Nama Pengguna';
+        const savedProfile = localStorage.getItem(`profile_${currentUser.id}`);
+        if (savedProfile) {
+            try {
+                const parsed = JSON.parse(savedProfile);
+                const parsedName = parsed.name === 'Nama Pengguna' ? '' : parsed.name;
+                return {
+                    name: parsedName || defaultName,
+                    avatarIndex: parsed.avatarIndex !== undefined ? parsed.avatarIndex : currentUser.id % AVATAR_POOL.length,
+                    customAvatarUrl: parsed.customAvatarUrl || null
+                };
+            } catch {
+                // ignore
+            }
+        }
+        return {
+            name: defaultName,
+            avatarIndex: currentUser.id % AVATAR_POOL.length,
+            customAvatarUrl: null
+        };
+    };
+
+    const [initialProfile] = useState(getInitialProfile);
+    const [name, setName] = useState(initialProfile.name);
+    const [avatarIndex, setAvatarIndex] = useState(initialProfile.avatarIndex);
+    const [customAvatarUrl, setCustomAvatarUrl] = useState(initialProfile.customAvatarUrl);
     const fileInputRef = useRef(null);
-    const didHydrateProfile = useRef(false);
 
     const saveProfileToStorage = (profileData) => {
         if (!currentUser) {
             return;
         }
 
-        localStorage.setItem(`profile_${currentUser.id}`, JSON.stringify(profileData));
+        try {
+            localStorage.setItem(`profile_${currentUser.id}`, JSON.stringify(profileData));
+        } catch (error) {
+            console.error("Local storage error:", error);
+            alert("Gagal menyimpan profil! Jika Anda mengunggah gambar, mungkin ukurannya terlalu besar.");
+        }
     };
 
-    // Load initial profile data from localStorage or fallback
     useEffect(() => {
-        if (currentUser) {
-            const savedProfile = localStorage.getItem(`profile_${currentUser.id}`);
-            try {
-                if (savedProfile) {
-                    const parsed = JSON.parse(savedProfile);
-                    setName(parsed.name || 'Nama Pengguna');
-                    setAvatarIndex(parsed.avatarIndex !== undefined ? parsed.avatarIndex : currentUser.id % AVATAR_POOL.length);
-                    setCustomAvatarUrl(parsed.customAvatarUrl || null);
-                } else {
-                    setName('Nama Pengguna');
-                    setAvatarIndex(currentUser.id % AVATAR_POOL.length);
-                    setCustomAvatarUrl(null);
-                }
-            } catch {
-                setName('Nama Pengguna');
-                setAvatarIndex(currentUser.id % AVATAR_POOL.length);
-                setCustomAvatarUrl(null);
-            }
-
-            didHydrateProfile.current = true;
-        }
-    }, [currentUser]);
-
-    useEffect(() => {
-        if (!currentUser || !didHydrateProfile.current) {
+        if (!currentUser) {
             return;
         }
 
+        const defaultName = currentUser.email ? currentUser.email.split('@')[0] : 'Nama Pengguna';
         saveProfileToStorage({
-            name: name.trim() || 'Nama Pengguna',
+            name: name.trim() || defaultName,
             avatarIndex,
             customAvatarUrl
         });
     }, [currentUser, name, avatarIndex, customAvatarUrl]);
 
     const handleSave = () => {
+        const defaultName = currentUser?.email ? currentUser.email.split('@')[0] : 'Nama Pengguna';
         saveProfileToStorage({
-            name: name.trim() || 'Nama Pengguna',
+            name: name.trim() || defaultName,
             avatarIndex,
             customAvatarUrl
         });
@@ -114,24 +120,24 @@ export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, 
                         <div className="profile-content-scroll">
                             <div className="profile-avatar-section">
                                 <div className="profile-avatar-wrapper">
-                                    <img 
-                                        src={customAvatarUrl || AVATAR_POOL[avatarIndex]} 
-                                        alt="Profile" 
-                                        className="profile-avatar-img" 
-                                        style={{ borderRadius: '50%', width: '100%', height: '100%', objectFit: 'cover' }} 
+                                    <img
+                                        src={customAvatarUrl || AVATAR_POOL[avatarIndex]}
+                                        alt="Profile"
+                                        className="profile-avatar-img"
+                                        style={{ borderRadius: '50%', width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                     {isEditing && (
                                         <>
-                                            <input 
-                                                type="file" 
-                                                ref={fileInputRef} 
-                                                onChange={handleFileChange} 
-                                                accept="image/*" 
-                                                style={{ display: 'none' }} 
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileChange}
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
                                             />
-                                            <button 
-                                                className="profile-avatar-cam-btn" 
-                                                type="button" 
+                                            <button
+                                                className="profile-avatar-cam-btn"
+                                                type="button"
                                                 aria-label="Upload photo"
                                                 onClick={handleCameraClick}
                                                 title="Upload Foto"
@@ -149,11 +155,11 @@ export default function Profile({ currentUser, onGoToDashboard, onGoToContacts, 
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">Nama Lengkap</span>
                                     {isEditing ? (
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             className="profile-name-input"
-                                            value={name} 
-                                            onChange={(e) => setName(e.target.value)} 
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
                                             autoFocus
                                         />
                                     ) : (

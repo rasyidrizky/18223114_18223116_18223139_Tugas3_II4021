@@ -29,14 +29,16 @@ export default function DashboardSidebar({ items, catVariant = 'kucing', current
 
     useEffect(() => {
         if (currentUser) {
+            const defaultName = currentUser.email ? currentUser.email.split('@')[0] : 'Nama Pengguna';
             const savedProfile = localStorage.getItem(`profile_${currentUser.id}`);
             if (savedProfile) {
                 const parsed = JSON.parse(savedProfile);
-                setSidebarName(parsed.name || 'Nama Pengguna');
+                const parsedName = parsed.name === 'Nama Pengguna' ? '' : parsed.name;
+                setSidebarName(parsedName || defaultName);
                 const defaultAvatar = AVATAR_POOL[parsed.avatarIndex !== undefined ? parsed.avatarIndex : currentUser.id % AVATAR_POOL.length];
                 setSidebarAvatar(parsed.customAvatarUrl || defaultAvatar);
             } else {
-                setSidebarName('Nama Pengguna');
+                setSidebarName(defaultName);
                 setSidebarAvatar(AVATAR_POOL[currentUser.id % AVATAR_POOL.length]);
             }
         }
